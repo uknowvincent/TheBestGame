@@ -123,25 +123,26 @@ def game():
         # зададим начальный сдвиг камеры
         def __init__(self):
             self.dx = 0
-            self.dy = 0
 
         # сдвинуть объект obj на смещение камеры
-        def apply(self, obj):
-            obj.rect.x += self.dx
-            obj.rect.y += self.dy
+        def apply(self, obj, target):
+            if 800 - (target.rect.x % 800) < 75 and 75 < target.rect.x - 75 < 3000:
+                    obj.rect.x -= 5
+                    target.rect.x -= 3
+            if 800 - (target.rect.x % 800) < 75 and 75 < target.rect.x < 3000:
+                    obj.rect.x += 5
+                    target.rect.x += 3
+            print(target.rect.x, obj.rect.x)
 
-        # позиционировать камеру на объекте target
-        def update(self, target):
-            self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
-            self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
+
     """
     Основной игровой цикл
     """
-    ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 500)
     camera = Camera()
     background = pygame.sprite.Sprite(all_sprites)
     background.image = load_image('background.png')
     background.rect = background.image.get_rect()
+    ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 442)
     running = True
     while running:
         for event in pygame.event.get():
@@ -150,17 +151,18 @@ def game():
                 terminate()
         ship.cur_anim = 'straight'
         if pygame.key.get_pressed()[pygame.K_LEFT]:
-            ship.rect.x -= ship.speed
-            ship.cur_anim = 'left'
+            if -2470 < background.rect.x <= 0:
+                ship.rect.x -= ship.speed
+                ship.cur_anim = 'left'
         if pygame.key.get_pressed()[pygame.K_RIGHT]:
-            ship.rect.x += ship.speed
-            ship.cur_anim = 'right'
+            if -2475 <= background.rect.x <= 0:
+                ship.rect.x += ship.speed
+                ship.cur_anim = 'right'
         all_sprites.draw(screen)
         all_sprites.update()
         pygame.display.flip()
         clock.tick(FPS)
-        camera.update(background)
-        camera.apply(ship)
+        camera.apply(background, ship)
     pygame.quit()
 
 
