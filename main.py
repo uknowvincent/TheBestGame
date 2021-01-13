@@ -30,6 +30,7 @@ class Ship(pygame.sprite.Sprite):
     """
     Класс корабля
     """
+
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites)
         self.speed = 2
@@ -118,6 +119,53 @@ def start_screen():
         clock.tick(FPS)
 
 
+def home_beeing():
+    class Camera:
+        # зададим начальный сдвиг камеры
+        def __init__(self):
+            self.dx = 0
+
+        # сдвинуть объект obj на смещение камеры
+        def apply(self, obj, target):
+            if 349 < (target.rect.x % 800) <= 725:
+                obj.rect.x -= 2
+                target.rect.x -= 2
+            elif 348 > (target.rect.x % 800) <= 725:
+                obj.rect.x += 2
+                target.rect.x += 2
+
+    camera = Camera()
+    background = pygame.sprite.Sprite(all_sprites)
+    background.image = load_image('background.png')
+    background.rect = background.image.get_rect()
+    ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 442)
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                terminate()
+        ship.cur_anim = 'straight'
+        if pygame.key.get_pressed()[pygame.K_LEFT]:
+            ship.rect.x -= ship.speed
+            ship.cur_anim = 'left'
+        if pygame.key.get_pressed()[pygame.K_RIGHT]:
+            ship.rect.x += ship.speed
+            ship.cur_anim = 'right'
+        all_sprites.draw(screen)
+        all_sprites.update()
+        pygame.display.flip()
+        clock.tick(FPS)
+        print(background.rect.x)
+        if background.rect.x == 152:
+            background.rect.x = 150
+        if background.rect.x == -2202:
+            background.rect.x = -2200
+        if 150 >= background.rect.x >= -2200:
+            camera.apply(background, ship)
+    pygame.quit()
+
+
 def game():
     class Camera:
         # зададим начальный сдвиг камеры
@@ -126,14 +174,13 @@ def game():
 
         # сдвинуть объект obj на смещение камеры
         def apply(self, obj, target):
-            if 800 - (target.rect.x % 800) < 75 and 75 < target.rect.x - 75 < 3000:
-                    obj.rect.x -= 5
-                    target.rect.x -= 3
-            if 800 - (target.rect.x % 800) < 75 and 75 < target.rect.x < 3000:
-                    obj.rect.x += 5
-                    target.rect.x += 3
-            print(target.rect.x, obj.rect.x)
-
+            if 349 < (target.rect.x % 800) <= 725:
+                obj.rect.x -= 2
+                target.rect.x -= 2
+            elif 348 > (target.rect.x % 800) <= 725:
+                obj.rect.x += 2
+                target.rect.x += 2
+            # print(target.rect.x, obj.rect.x, obj.rect.x - target.rect.x, (target.rect.x % 800))
 
     """
     Основной игровой цикл
@@ -149,20 +196,27 @@ def game():
             if event.type == pygame.QUIT:
                 running = False
                 terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if 138 <= event.pos[0] <= 315 and 340 <= event.pos[1] <= 474:
+                    home_beeing()
         ship.cur_anim = 'straight'
         if pygame.key.get_pressed()[pygame.K_LEFT]:
-            if -2470 < background.rect.x <= 0:
-                ship.rect.x -= ship.speed
-                ship.cur_anim = 'left'
+            ship.rect.x -= ship.speed
+            ship.cur_anim = 'left'
         if pygame.key.get_pressed()[pygame.K_RIGHT]:
-            if -2475 <= background.rect.x <= 0:
-                ship.rect.x += ship.speed
-                ship.cur_anim = 'right'
+            ship.rect.x += ship.speed
+            ship.cur_anim = 'right'
         all_sprites.draw(screen)
         all_sprites.update()
         pygame.display.flip()
         clock.tick(FPS)
-        camera.apply(background, ship)
+        print(background.rect.x)
+        if background.rect.x == 152:
+            background.rect.x = 150
+        if background.rect.x == -2202:
+            background.rect.x = -2200
+        if 150 >= background.rect.x >= -2200:
+            camera.apply(background, ship)
     pygame.quit()
 
 
