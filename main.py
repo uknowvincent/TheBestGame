@@ -30,7 +30,7 @@ def load_image(name, color_key=None):
 
 class Ship(pygame.sprite.Sprite):
     """
-    Класс корабля
+    Кл
     """
 
     def __init__(self, sheet, columns, rows, x, y):
