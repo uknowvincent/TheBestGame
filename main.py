@@ -32,9 +32,10 @@ class Ship(pygame.sprite.Sprite):
     """
     Класс корабля
     """
+
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites)
-        self.speed = 2
+        self.speed = 5
         self.tick = 0
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -81,7 +82,6 @@ def terminate():
 
 
 def start_screen():
-
     """
     Начальная заставка с кнопками
     """
@@ -128,7 +128,8 @@ def counter_catching():
 
 
 def first_mini_game():
-    font = pygame.font.SysFont('Arial')
+    font = pygame.font.SysFont('Arial', 24, True)
+    text = font.render('ВЫ ПРОИГРАЛИ. ПЕРЕЗАПУСК ИГРЫ.', True, (255, 255, 255))
 
     class Monster(pygame.sprite.Sprite):
         image = load_image("mountains.png")
@@ -158,17 +159,15 @@ def first_mini_game():
                 counter_catching()
                 print(counter_catch)
             if self.rect.y == 560:
-                pygame.time.delay(500)
+                pygame.time.delay(700)
                 first_mini_game()
             else:
                 self.rect = self.rect.move(0, 2)
-
 
     if __name__ == '__main__':
         pygame.init()
         pygame.display.set_caption('Food Catcher')
         all_sprites = pygame.sprite.Group()
-        horizontal_border = pygame.sprite.Group()
         mountain = Monster()
         fps = 60
         clock = pygame.time.Clock()
@@ -196,7 +195,75 @@ def first_mini_game():
         game()
 
 
-def labirinth():
+def run_minigame():
+    class Enemy(pygame.sprite.Sprite):
+        image = load_image("krovosisya.png")
+
+        def __init__(self, position):
+            super().__init__(all_sprites)
+            self.counter_catching = 0
+            self.image = Enemy.image
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect.x = position[0]
+            self.rect.y = position[1]
+
+        def update(self):
+            if pygame.sprite.collide_mask(self, player):
+                pygame.time.delay(700)
+                run_minigame()
+            else:
+                self.rect = self.rect.move(3, 0)
+
+    class Player(pygame.sprite.Sprite):
+        image = load_image("lizard_dont_go.png")
+
+        def __init__(self):
+            super().__init__(all_sprites)
+            self.image = Player.image
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect.bottom = HEIGHT
+
+    if __name__ == '__main__':
+        pygame.init()
+        pygame.display.set_caption('Food Catcher')
+        all_sprites = pygame.sprite.Group()
+        player = Player()
+        fps = 60
+        clock = pygame.time.Clock()
+        counter_spawn = -100
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            if pygame.key.get_pressed()[pygame.K_RIGHT]:
+                if player.rect.x >= 773:
+                    player.rect.x -= 2
+                player.rect.x += 2
+            if pygame.key.get_pressed()[pygame.K_LEFT]:
+                if player.rect.x == 0:
+                    player.rect.x += 2
+                player.rect.x -= 2
+            if pygame.key.get_pressed()[pygame.K_UP]:
+                if player.rect.y <= 0:
+                    player.rect.y += 2
+                player.rect.y -= 2
+            if pygame.key.get_pressed()[pygame.K_DOWN]:
+                if player.rect.y == 541:
+                    player.rect.y -= 2
+                player.rect.y += 2
+            print(counter_spawn)
+            if counter_spawn >= -1000:
+                Enemy((counter_spawn, random.randrange(50, 550, 50)))
+                counter_spawn -= 100
+            screen.fill((255, 255, 255))
+            all_sprites.draw(screen)
+            all_sprites.update()
+            clock.tick(fps)
+            pygame.display.flip()
+        game()
 
 
 def game():
@@ -239,12 +306,11 @@ def game():
         if -520 >= background.rect.x >= -720 and pygame.key.get_pressed()[pygame.K_SPACE]:
             first_mini_game()
         if -1200 >= background.rect.x >= -1360 and pygame.key.get_pressed()[pygame.K_SPACE]:
-            first_mini_game()
+            run_minigame()
         all_sprites.draw(screen)
         all_sprites.update()
         pygame.display.flip()
         clock.tick(FPS)
-        print(background.rect.x)
         if background.rect.x == 152:
             background.rect.x = 150
         if background.rect.x == -2202:
