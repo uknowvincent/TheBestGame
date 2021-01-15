@@ -1,81 +1,8 @@
-'''
-Подружить со вторым циклом
-import os
-import sys
-import pygame
-
-size = width, height = 800, 600
-screen = pygame.display.set_mode(size)
-
-
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{name}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    if colorkey is not None:
-        image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
-
-
-class Monster(pygame.sprite.Sprite):
-    image = load_image("mountains.png")
-
-    def __init__(self):
-        super().__init__(all_sprites)
-        self.image = Monster.image
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect.bottom = height
-
-
-class Food(pygame.sprite.Sprite):
-    image = load_image("pt.png")
-
-    def __init__(self, pos):
-        super().__init__(all_sprites)
-        self.image = Food.image
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect.x = pos[0]
-        self.rect.y = pos[1]
-
-    def update(self):
-        if not pygame.sprite.collide_mask(self, mountain):
-            self.rect = self.rect.move(1, 1)
-
-if __name__ == '__main__':
-    pygame.init()
-    pygame.display.set_caption('Шарики')
-    all_sprites = pygame.sprite.Group()
-    mountain = Monster()
-
-    fps = 60
-    clock = pygame.time.Clock()
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                Food(event.pos)
-            if event.type == pygame.QUIT:
-                running = False
-        screen.fill((255, 255, 255))
-        all_sprites.draw(screen)
-        all_sprites.update()
-        clock.tick(fps)
-        pygame.display.flip()
-    pygame.quit()
-'''
 import os
 import pygame
 import pygame_gui
 import sys
+import random
 
 pygame.init()
 
@@ -84,6 +11,7 @@ WIDTH = 800
 HEIGHT = 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+counter_catch = 0
 
 
 def load_image(name, color_key=None):
@@ -104,7 +32,6 @@ class Ship(pygame.sprite.Sprite):
     """
     Класс корабля
     """
-
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites)
         self.speed = 2
@@ -154,9 +81,11 @@ def terminate():
 
 
 def start_screen():
+
     """
     Начальная заставка с кнопками
     """
+
     manager = pygame_gui.UIManager((WIDTH, HEIGHT), os.path.join('data', 'menu_theme.json'))
     # Кнопки
     start_btn = pygame_gui.elements.UIButton(
@@ -193,51 +122,81 @@ def start_screen():
         clock.tick(FPS)
 
 
-def home_beeing():
-    class Camera:
-        # зададим начальный сдвиг камеры
+def counter_catching():
+    global counter_catch
+    counter_catch += 1
+
+
+def first_mini_game():
+    font = pygame.font.SysFont('Arial')
+
+    class Monster(pygame.sprite.Sprite):
+        image = load_image("mountains.png")
+
         def __init__(self):
-            self.dx = 0
+            super().__init__(all_sprites)
+            self.image = Monster.image
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect.bottom = HEIGHT
 
-        # сдвинуть объект obj на смещение камеры
-        def apply(self, obj, target):
-            if 349 < (target.rect.x % 800) <= 725:
-                obj.rect.x -= 2
-                target.rect.x -= 2
-            elif 348 > (target.rect.x % 800) <= 725:
-                obj.rect.x += 2
-                target.rect.x += 2
+    class Food(pygame.sprite.Sprite):
+        image = load_image("pt.png")
 
-    camera = Camera()
-    background = pygame.sprite.Sprite(all_sprites)
-    background.image = load_image('background.png')
-    background.rect = background.image.get_rect()
-    ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 442)
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-                terminate()
-        ship.cur_anim = 'straight'
-        if pygame.key.get_pressed()[pygame.K_LEFT]:
-            ship.rect.x -= ship.speed
-            ship.cur_anim = 'left'
-        if pygame.key.get_pressed()[pygame.K_RIGHT]:
-            ship.rect.x += ship.speed
-            ship.cur_anim = 'right'
-        all_sprites.draw(screen)
-        all_sprites.update()
-        pygame.display.flip()
-        clock.tick(FPS)
-        print(background.rect.x)
-        if background.rect.x == 152:
-            background.rect.x = 150
-        if background.rect.x == -2202:
-            background.rect.x = -2200
-        if 150 >= background.rect.x >= -2200:
-            camera.apply(background, ship)
-    pygame.quit()
+        def __init__(self, position):
+            super().__init__(all_sprites)
+            self.counter_catching = 0
+            self.image = Food.image
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect.x = position[0]
+            self.rect.y = position[1]
+
+        def update(self):
+            if pygame.sprite.collide_mask(self, mountain):
+                self.kill()
+                counter_catching()
+                print(counter_catch)
+            if self.rect.y == 560:
+                pygame.time.delay(500)
+                first_mini_game()
+            else:
+                self.rect = self.rect.move(0, 2)
+
+
+    if __name__ == '__main__':
+        pygame.init()
+        pygame.display.set_caption('Food Catcher')
+        all_sprites = pygame.sprite.Group()
+        horizontal_border = pygame.sprite.Group()
+        mountain = Monster()
+        fps = 60
+        clock = pygame.time.Clock()
+        flag = True
+        running = True
+        counter_spawn = 10
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            if pygame.key.get_pressed()[pygame.K_LEFT]:
+                mountain.rect.x -= 8
+            if pygame.key.get_pressed()[pygame.K_RIGHT]:
+                mountain.rect.x += 8
+            if counter_spawn != -990:
+                Food((random.randrange(30, 740), counter_spawn))
+                counter_spawn -= 100
+            if counter_catch == 10:
+                game()
+            screen.fill((255, 255, 255))
+            all_sprites.draw(screen)
+            all_sprites.update()
+            clock.tick(fps)
+            pygame.display.flip()
+        game()
+
+
+def labirinth():
 
 
 def game():
@@ -254,11 +213,11 @@ def game():
             elif 348 > (target.rect.x % 800) <= 725:
                 obj.rect.x += 2
                 target.rect.x += 2
-            # print(target.rect.x, obj.rect.x, obj.rect.x - target.rect.x, (target.rect.x % 800))
 
     """
     Основной игровой цикл
     """
+    sound = pygame.mixer.Sound(os.path.join('data', 'go_sound.wav'))
     camera = Camera()
     background = pygame.sprite.Sprite(all_sprites)
     background.image = load_image('background.png')
@@ -270,9 +229,6 @@ def game():
             if event.type == pygame.QUIT:
                 running = False
                 terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if 138 <= event.pos[0] <= 315 and 340 <= event.pos[1] <= 474:
-                    home_beeing()
         ship.cur_anim = 'straight'
         if pygame.key.get_pressed()[pygame.K_LEFT]:
             ship.rect.x -= ship.speed
@@ -280,6 +236,10 @@ def game():
         if pygame.key.get_pressed()[pygame.K_RIGHT]:
             ship.rect.x += ship.speed
             ship.cur_anim = 'right'
+        if -520 >= background.rect.x >= -720 and pygame.key.get_pressed()[pygame.K_SPACE]:
+            first_mini_game()
+        if -1200 >= background.rect.x >= -1360 and pygame.key.get_pressed()[pygame.K_SPACE]:
+            first_mini_game()
         all_sprites.draw(screen)
         all_sprites.update()
         pygame.display.flip()
