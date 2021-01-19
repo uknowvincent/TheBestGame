@@ -107,7 +107,7 @@ def start_screen():
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == start_btn:
-                        continue_game()
+                        end_game()
                     if event.ui_element == exit_btn:
                         terminate()
             manager.process_events(event)
@@ -428,6 +428,7 @@ def game():
     legend_telling_flag = False
     lesnik_event = True
     krovosisya_event = True
+    krasnoshmig_event = True
     elder_event = True
     running = True
     flag_go = False
@@ -453,9 +454,6 @@ def game():
             sound.play()
         else:
             sound.stop()
-        if -520 >= background.rect.x >= -720 and pygame.key.get_pressed()[pygame.K_SPACE]:
-            first_mini_game()
-            krasnoshmig_event = False
         all_sprites.draw(screen)
         all_sprites.update()
         if -36 >= background.rect.x >= -82 and not pygame.key.get_pressed()[pygame.K_e]:
@@ -473,6 +471,9 @@ def game():
         if -520 >= background.rect.x >= -720 and not pygame.key.get_pressed()[pygame.K_SPACE] and not lesnik_event:
             clear_sf_from_text()
             print_text('Нажмите пробел, чтобы пойти с лесником к красношмыгу')
+        if -520 >= background.rect.x >= -720 and pygame.key.get_pressed()[pygame.K_SPACE]:
+            first_mini_game()
+            krasnoshmig_event = False
         #print(krovosisya_event)
         if not krovosisya_event and 50 >= background.rect.x >= -200:
             clear_sf_from_text()
@@ -525,6 +526,7 @@ def continue_game():
                 running = False
                 terminate()
         ship.cur_anim = 'straight'
+        print(background.rect.x)
         if pygame.key.get_pressed()[pygame.K_LEFT]:
             flag_go = True
             ship.rect.x -= ship.speed
@@ -574,10 +576,87 @@ def continue_game():
     pygame.quit()
 
 
+def end_game():
+    class Camera:
+        # зададим начальный сдвиг камеры
+
+        def __init__(self):
+            self.dx = 0
+
+        # сдвинуть объект obj на смещение камеры
+
+        def apply(self, obj, target):
+            if 349 < (target.rect.x % 800) <= 725:
+                obj.rect.x -= 2
+                target.rect.x -= 2
+            elif 348 > (target.rect.x % 800) <= 725:
+                obj.rect.x += 2
+                target.rect.x += 2
+
+    """
+    Игровой цикл после первого испытания
+    """
+
+    sound = pygame.mixer.Sound(os.path.join('data', 'go_sound.wav'))
+    camera = Camera()
+    background = pygame.sprite.Sprite(all_sprites)
+    background.image = load_image('background.png')
+    background.rect = background.image.get_rect()
+    ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 442)
+    krovosisya_event = True
+    running = True
+    flag_go = False
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                terminate()
+        ship.cur_anim = 'straight'
+        print(background.rect.x)
+        if pygame.key.get_pressed()[pygame.K_LEFT]:
+            flag_go = True
+            ship.rect.x -= ship.speed
+            ship.cur_anim = 'left'
+        if pygame.key.get_pressed()[pygame.K_RIGHT]:
+            flag_go = True
+            ship.rect.x += ship.speed
+            ship.cur_anim = 'right'
+        if flag_go:
+            flag_go = False
+            sound.play(-1)
+        else:
+            sound.stop()
+        if -1944 >= background.rect.x >= -2200 and not pygame.key.get_pressed()[pygame.K_SPACE]:
+            background = pygame.sprite.Sprite(end_game_sprites)
+            background.image = load_image('final_background.png')
+            background.rect = background.image.get_rect()
+            end_game_sprites.draw(screen)
+            end_game_sprites.update()
+        all_sprites.draw(screen)
+        all_sprites.update()
+        if -1944 >= background.rect.x >= -2200 and not pygame.key.get_pressed()[pygame.K_e]:
+            clear_sf_from_text()
+            print_text('Нажмите Е, чтобы войти в пещеру.')
+        print(krovosisya_event)
+        if  50 >= background.rect.x >= -200:
+            clear_sf_from_text()
+            print_text('Отправляйтесь на битву с АЮ')
+        pygame.display.flip()
+        clock.tick(FPS)
+        print(background.rect.x)
+        if background.rect.x == 152:
+            background.rect.x = 150
+        if background.rect.x == -2202:
+            background.rect.x = -2200
+        if 150 >= background.rect.x >= -2200:
+            camera.apply(background, ship)
+    pygame.quit()
+
+# clear_sf_from_text()
+#             print_text('Вы уже оседлали красношмыга')
 all_sprites = pygame.sprite.Group()
 start_legend_sprites = pygame.sprite.Group()
 first_minigame_sprites = pygame.sprite.Group()
+end_game_sprites = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
-player_bullets = pygame.sprite.Group()
-enemy_bullets = pygame.sprite.Group()
 start_screen()
