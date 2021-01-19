@@ -428,7 +428,6 @@ def game():
     legend_telling_flag = False
     lesnik_event = True
     krovosisya_event = True
-    krasnoshmig_event = True
     elder_event = True
     running = True
     flag_go = False
