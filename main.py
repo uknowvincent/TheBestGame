@@ -107,7 +107,7 @@ def start_screen():
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == start_btn:
-                        end_game()
+                        game()
                     if event.ui_element == exit_btn:
                         terminate()
             manager.process_events(event)
@@ -165,9 +165,9 @@ def first_mini_game():
     if __name__ == '__main__':
         pygame.init()
         pygame.display.set_caption('Food Catcher')
-        legend_start = pygame.sprite.Sprite(first_minigame_sprites)
-        legend_start.image = load_image('first_minigame.png')
-        legend_start.rect = legend_start.image.get_rect()
+        first_minigame = pygame.sprite.Sprite(first_minigame_sprites)
+        first_minigame.image = load_image('first_minigame.png')
+        first_minigame.rect = first_minigame.image.get_rect()
         all_sprites = pygame.sprite.Group()
         monster = Monster()
         fps = 60
@@ -231,7 +231,10 @@ def run_minigame():
 
     if __name__ == '__main__':
         pygame.init()
-        pygame.display.set_caption('Food Catcher')
+        pygame.display.set_caption('Run')
+        run_mini_game = pygame.sprite.Sprite(run_minigame_sprites)
+        run_mini_game.image = load_image('topi.png')
+        run_mini_game.rect = run_mini_game.image.get_rect()
         all_sprites = pygame.sprite.Group()
         player = Player()
         fps = 60
@@ -244,31 +247,76 @@ def run_minigame():
                     running = False
             if pygame.key.get_pressed()[pygame.K_RIGHT]:
                 if player.rect.x >= 773:
-                    player.rect.x -= 2
+                    player.rect.x -= 4
                 player.rect.x += 4
             if pygame.key.get_pressed()[pygame.K_LEFT]:
                 if player.rect.x <= 0:
-                    player.rect.x += 2
+                    player.rect.x += 4
                 player.rect.x -= 4
             if pygame.key.get_pressed()[pygame.K_UP]:
                 if player.rect.y <= 0:
-                    player.rect.y += 2
+                    player.rect.y += 4
                 player.rect.y -= 4
             if pygame.key.get_pressed()[pygame.K_DOWN]:
                 if player.rect.y >= 541:
-                    player.rect.y -= 2
+                    player.rect.y -= 4
                 player.rect.y += 4
             if counter_spawn >= -1000:
                 Enemy((counter_spawn, random.randrange(50, 550, 50)))
                 counter_spawn -= 50
             if counter_krovo_kill == 19:
-                game()
+                end_game()
             screen.fill((255, 255, 255))
+            run_minigame_sprites.draw(screen)
             all_sprites.draw(screen)
             all_sprites.update()
             clock.tick(fps)
             pygame.display.flip()
-        game()
+        pygame.quit()
+
+
+def the_ending():
+    class Player(pygame.sprite.Sprite):
+        image = load_image("lizard_dont_go.png")
+
+        def __init__(self):
+            super().__init__(all_sprites)
+            self.image = Player.image
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect.bottom = HEIGHT
+
+    if __name__ == '__main__':
+        pygame.init()
+        pygame.display.set_caption('Ending')
+        ending = pygame.sprite.Sprite(end_game_sprites)
+        ending.image = load_image('ending_scene.png')
+        ending.rect = ending.image.get_rect()
+        all_sprites = pygame.sprite.Group()
+        player = Player()
+        fps = 60
+        clock = pygame.time.Clock()
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            if pygame.key.get_pressed()[pygame.K_RIGHT]:
+                if player.rect.x >= 773:
+                    player.rect.x -= 3
+                player.rect.x += 3
+            if pygame.key.get_pressed()[pygame.K_LEFT]:
+                if player.rect.x <= 0:
+                    player.rect.x += 3
+                player.rect.x -= 3
+            screen.fill((255, 255, 255))
+            end_game_sprites.draw(screen)
+            all_sprites.draw(screen)
+            all_sprites.update()
+            ending_dialogue()
+            clock.tick(fps)
+            pygame.display.flip()
+        last_scene_telling()
 
 
 def print_text(text, coords=(20, 517), color=(0, 100, 50), size=30):
@@ -286,6 +334,7 @@ def clear_sf_from_text():
 
 
 def elder_dialogue():
+    # разговор со старейшиной
     clear_sf_from_text()
     print_text('- Так ты попал сюда, сынок...')
     pygame.time.delay(3500)
@@ -327,6 +376,7 @@ def elder_dialogue():
 
 
 def forest_owner_dialogue():
+    # разговор с лесником
     clear_sf_from_text()
     print_text('- О, заходи быстрее ко мне, а то так и пришкваришся к дороге.')
     pygame.time.delay(3500)
@@ -358,6 +408,51 @@ def forest_owner_dialogue():
     clear_sf_from_text()
     print_text('- Я отведу тебя к красношмыгу через задние ворота.')
     pygame.time.delay(3500)
+
+
+def ending_dialogue():
+    # разговор с АЮ
+    clear_sf_from_text()
+    print_text('- Так вот ты какой... Желтый лизард...')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('- Ты пришел, чтобы меня убить...?')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('- Можешь начинать, однако я не хотел причинить кому-то вред.')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('- Наша страна разорилась...')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('- Я остался один... Без дома... Без пропитания...')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('- Ах если бы лишь было место, где я бы мог жить...')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('- Жить, не причиняя вреда')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('Я знаю одно место!', (20, 517), (255, 211, 0))
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('Мои родные края опустели, однако...', (20, 517), (255, 211, 0))
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('Я часто замечал похожих на тебя в лесу', (20, 517), (255, 211, 0))
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('Я дам тебе карту, и ты сможешь найти себе новый дом!', (20, 517), (255, 211, 0))
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    clear_sf_from_text()
+    print_text('- Спасибо тебе великий лизард...')
+    pygame.time.delay(3500)
+    clear_sf_from_text()
+    print_text('- Ты спас всех нас')
+    pygame.time.delay(3500)
+    last_scene_telling()
 
 
 def legend_telling():
@@ -396,7 +491,30 @@ def legend_telling():
     pygame.time.delay(3500)
 
 
+def last_scene_telling():
+    # финальная заставка. текст
+    legend_start = pygame.sprite.Sprite(start_legend_sprites)
+    legend_start.image = load_image('legend_start.png')
+    legend_start.rect = legend_start.image.get_rect()
+    start_legend_sprites.draw(screen)
+    print_text('Деревня лизардов была спасена.', (50, 100))
+    pygame.time.delay(3500)
+    print_text('Дух АЮ перестал разорять их земли и нашел новый дом.', (50, 150))
+    pygame.time.delay(3500)
+    print_text('Желтого лизарда провозгласили героем.', (50, 200))
+    pygame.time.delay(3500)
+    print_text('Он стал символом этой деревни.', (50, 250))
+    pygame.time.delay(3500)
+    print_text('Все начало процветать вновь', (50, 300))
+    pygame.time.delay(3500)
+    print_text('И печаль и страх навсегда покинули лизардов.', (50, 350))
+    pygame.time.delay(3500)
+    start_screen()
+
+
 def game():
+    # первое испытание
+
     class Camera:
         # зададим начальный сдвиг камеры
 
@@ -413,10 +531,6 @@ def game():
                 obj.rect.x += 2
                 target.rect.x += 2
 
-    """
-    Основной игровой цикл
-    """
-    sound = pygame.mixer.Sound(os.path.join('data', 'go_sound.wav'))
     camera = Camera()
     legend_start = pygame.sprite.Sprite(start_legend_sprites)
     legend_start.image = load_image('legend_start.png')
@@ -425,13 +539,11 @@ def game():
     background.image = load_image('background.png')
     background.rect = background.image.get_rect()
     ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 442)
-    legend_telling_flag = False
+    legend_telling_flag = True
     lesnik_event = True
     krovosisya_event = True
-    krasnoshmig_event = True
     elder_event = True
     running = True
-    flag_go = False
     while running:
         if legend_telling_flag:
             legend_telling()
@@ -442,18 +554,11 @@ def game():
                 terminate()
         ship.cur_anim = 'straight'
         if pygame.key.get_pressed()[pygame.K_LEFT]:
-            flag_go = True
             ship.rect.x -= ship.speed
             ship.cur_anim = 'left'
         if pygame.key.get_pressed()[pygame.K_RIGHT]:
-            flag_go = True
             ship.rect.x += ship.speed
             ship.cur_anim = 'right'
-        if flag_go:
-            flag_go = False
-            sound.play()
-        else:
-            sound.stop()
         all_sprites.draw(screen)
         all_sprites.update()
         if -36 >= background.rect.x >= -82 and not pygame.key.get_pressed()[pygame.K_e]:
@@ -473,14 +578,11 @@ def game():
             print_text('Нажмите пробел, чтобы пойти с лесником к красношмыгу')
         if -520 >= background.rect.x >= -720 and pygame.key.get_pressed()[pygame.K_SPACE]:
             first_mini_game()
-            krasnoshmig_event = False
-        #print(krovosisya_event)
         if not krovosisya_event and 50 >= background.rect.x >= -200:
             clear_sf_from_text()
             print_text('Отправляйтесь на битву с АЮ')
         pygame.display.flip()
         clock.tick(FPS)
-        #print(background.rect.x)
         if background.rect.x == 152:
             background.rect.x = 150
         if background.rect.x == -2202:
@@ -491,7 +593,9 @@ def game():
 
 
 def continue_game():
+    # второе испытание
     class Camera:
+
         # зададим начальный сдвиг камеры
 
         def __init__(self):
@@ -507,11 +611,6 @@ def continue_game():
                 obj.rect.x += 2
                 target.rect.x += 2
 
-    """
-    Игровой цикл после первого испытания
-    """
-
-    sound = pygame.mixer.Sound(os.path.join('data', 'go_sound.wav'))
     camera = Camera()
     background = pygame.sprite.Sprite(all_sprites)
     background.image = load_image('background.png')
@@ -519,27 +618,18 @@ def continue_game():
     ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 442)
     krovosisya_event = True
     running = True
-    flag_go = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 terminate()
         ship.cur_anim = 'straight'
-        print(background.rect.x)
         if pygame.key.get_pressed()[pygame.K_LEFT]:
-            flag_go = True
             ship.rect.x -= ship.speed
             ship.cur_anim = 'left'
         if pygame.key.get_pressed()[pygame.K_RIGHT]:
-            flag_go = True
             ship.rect.x += ship.speed
             ship.cur_anim = 'right'
-        if flag_go:
-            flag_go = False
-            sound.play(-1)
-        else:
-            sound.stop()
         if -1200 >= background.rect.x >= -1350 and pygame.key.get_pressed()[pygame.K_SPACE]:
             run_minigame()
             krovosisya_event = False
@@ -556,17 +646,14 @@ def continue_game():
             print_text('Лесник уже вам помог')
         if pygame.key.get_pressed()[pygame.K_e] and -36 >= background.rect.x >= -82:
             elder_dialogue()
-            elder_event = False
         if -520 >= background.rect.x >= -720 and not pygame.key.get_pressed()[pygame.K_SPACE]:
             clear_sf_from_text()
             print_text('Вы уже оседлали красношмыга')
-        print(krovosisya_event)
         if not krovosisya_event and 50 >= background.rect.x >= -200:
             clear_sf_from_text()
             print_text('Отправляйтесь на битву с АЮ')
         pygame.display.flip()
         clock.tick(FPS)
-        print(background.rect.x)
         if background.rect.x == 152:
             background.rect.x = 150
         if background.rect.x == -2202:
@@ -577,6 +664,7 @@ def continue_game():
 
 
 def end_game():
+    # встреча с АЮ
     class Camera:
         # зададим начальный сдвиг камеры
 
@@ -593,57 +681,36 @@ def end_game():
                 obj.rect.x += 2
                 target.rect.x += 2
 
-    """
-    Игровой цикл после первого испытания
-    """
-
-    sound = pygame.mixer.Sound(os.path.join('data', 'go_sound.wav'))
     camera = Camera()
     background = pygame.sprite.Sprite(all_sprites)
     background.image = load_image('background.png')
     background.rect = background.image.get_rect()
     ship = Ship(load_image("lizard_go.png"), 13, 1, 350, 442)
-    krovosisya_event = True
     running = True
-    flag_go = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 terminate()
         ship.cur_anim = 'straight'
-        print(background.rect.x)
         if pygame.key.get_pressed()[pygame.K_LEFT]:
-            flag_go = True
             ship.rect.x -= ship.speed
             ship.cur_anim = 'left'
         if pygame.key.get_pressed()[pygame.K_RIGHT]:
-            flag_go = True
             ship.rect.x += ship.speed
             ship.cur_anim = 'right'
-        if flag_go:
-            flag_go = False
-            sound.play(-1)
-        else:
-            sound.stop()
-        if -1944 >= background.rect.x >= -2200 and not pygame.key.get_pressed()[pygame.K_SPACE]:
-            background = pygame.sprite.Sprite(end_game_sprites)
-            background.image = load_image('final_background.png')
-            background.rect = background.image.get_rect()
-            end_game_sprites.draw(screen)
-            end_game_sprites.update()
+        if -1944 >= background.rect.x >= -2200 and pygame.key.get_pressed()[pygame.K_SPACE]:
+            the_ending()
         all_sprites.draw(screen)
         all_sprites.update()
         if -1944 >= background.rect.x >= -2200 and not pygame.key.get_pressed()[pygame.K_e]:
             clear_sf_from_text()
-            print_text('Нажмите Е, чтобы войти в пещеру.')
-        print(krovosisya_event)
-        if  50 >= background.rect.x >= -200:
+            print_text('Нажмите пробел, чтобы войти в пещеру.')
+        if 50 >= background.rect.x >= -200:
             clear_sf_from_text()
             print_text('Отправляйтесь на битву с АЮ')
         pygame.display.flip()
         clock.tick(FPS)
-        print(background.rect.x)
         if background.rect.x == 152:
             background.rect.x = 150
         if background.rect.x == -2202:
@@ -652,11 +719,30 @@ def end_game():
             camera.apply(background, ship)
     pygame.quit()
 
-# clear_sf_from_text()
-#             print_text('Вы уже оседлали красношмыга')
+
+def last_scene():
+    # финальная заставка
+    legend_telling()
+    background = pygame.sprite.Sprite(all_sprites)
+    background.image = load_image('legend_start.png')
+    background.rect = background.image.get_rect()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                terminate()
+        all_sprites.draw(screen)
+        all_sprites.update()
+        pygame.display.flip()
+        clock.tick(FPS)
+    pygame.quit()
+
+
 all_sprites = pygame.sprite.Group()
 start_legend_sprites = pygame.sprite.Group()
+start_legend_sprites = pygame.sprite.Group()
 first_minigame_sprites = pygame.sprite.Group()
+run_minigame_sprites = pygame.sprite.Group()
 end_game_sprites = pygame.sprite.Group()
-enemies = pygame.sprite.Group()
 start_screen()
